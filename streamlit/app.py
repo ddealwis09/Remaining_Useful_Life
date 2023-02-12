@@ -9,26 +9,32 @@ import pandas as pd
 from random import choice
 from bulk_upload_page import bulk_upload
 from single_predict_page import single_predict
+from explore_page import explore
 import streamlit.components.v1 as components
-
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 def main():
     
     # title, subtitle
     st.markdown("""---""")
     st.title("Predicting Remaining Useful Life")
-    st.subheader("A Machine Learning Approach for Turbofan Engine Maintenance")
+    st.subheader("ML Approach for Turbofan Engine Maintenance")
     st.markdown("""---""")
     
     # set pages
-    page = st.sidebar.selectbox("Choose prediction method", ("Bulk engine upload", "RUL simulator",  "Explore Data", "ML Ops"))
+    page = st.sidebar.selectbox("Choose prediction method", ("Explore Data", "Bulk Predictions", "RUL simulator", "ML Ops"))
 
     # User selects bulk upload option
-    if page == "Bulk engine upload":
+    if page == "Explore Data":
+        explore()
+
+    if page == "Bulk Predictions":
         bulk_upload()
 
     if page == "RUL simulator":
-            single_predict()
+        single_predict()
+
+
 
 
 
