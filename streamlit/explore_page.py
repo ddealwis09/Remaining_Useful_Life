@@ -76,9 +76,11 @@ def explore():
         fullpath_rul = path.joinpath(filename_rul)
         rul = pd.read_csv(fullpath_rul, sep='\s+',header=None,index_col=False)
 
-        return train
+        return train, test, rul
 
-    train = loading()
+    train = loading()[0]
+    test = loading()[1]
+    rul = loading()[2]
 
     # explore 1
     st.subheader("1. Single Engine Facet")
@@ -106,7 +108,7 @@ def explore():
     def sensorFacetPlot(df, unit_number):
         t = df[df['unit_number']==unit_number]
         g = sns.FacetGrid(t, col="sensor", col_wrap=4, sharex=False, sharey=False)
-        g.map_dataframe(sns.regplot, x="reading", y="RUL", order=2, 
+        g.map_dataframe(sns.regplot, x="RUL", y="reading", order=2, 
                         scatter=True, color='red', scatter_kws={"s": 80, "color": "lightblue", "edgecolor":"black"})
 
     st.pyplot(sensorFacetPlot(melted, engine_select)), melted
@@ -122,9 +124,51 @@ def explore():
     def engineFacetPlot(df, sensor):
         t = df[df['sensor']==sensor]
         g = sns.FacetGrid(t, col="unit_number", col_wrap=4, sharex=False, sharey=False)
-        g.map_dataframe(sns.regplot, x="reading", y="RUL", order=2, 
+        g.map_dataframe(sns.regplot, x="RUL", y="reading", order=2, 
                         scatter=True, color='red', scatter_kws={"s": 80, "color": "lightblue", "edgecolor":"black"})
 
     st.pyplot(engineFacetPlot(melted, sensor_select)), melted
 
-    
+    # explore 3
+    st.subheader("3. Test Set Predictions vs Actual")
+    st.text_area("Description", "Observe the model's performance vs actual RUL on the hold-out data set", key=3)
+
+    test_features = test.iloc[:,np.r_[0,5:26]]
+    test_features['predicted'] = make_prediction(test_features)
+    test_features['actual'] = rul
+    test_features['abs error (%)'] = abs(test_features.actual/test_features.predicted - 1) * 100
+    final = test_features.iloc[:,np.r_[0,22:25]]
+
+    # determine threshold
+    max = int(final['abs error (%)'].max())
+
+    threshold = st.slider('Set threshold absolute error (%) to filter on:', 0, max, 1)
+    filter = st.radio( "Do you want to filter predictions for engines only above or at your error threshold?", ('Yes', 'No'))
+
+    if filter == "Yes":
+        filtered = final[final['abs error (%)'] >= threshold]
+        st.write("Total number of engines above threshold:", len(filtered))
+        #mean_error = round(filtered['abs error (%)'].mean(),1)
+        #st.write("Mean error of filtered engines:", mean_error)
+        st.dataframe(filtered)
+
+        # plot distribution
+        fig, ax = plt.subplots()
+        fig.set_size_inches(3, 3)
+        plot = sns.histplot(x=filtered['abs error (%)'], kde=True, ax=ax)
+        plt.title('Error distrbution')
+        st.pyplot(plot.figure)
+    else:
+        st.write("Total number of engines:", len(final))
+        #mean_error = round(final['abs error (%)'].mean(),1)
+        #st.write("Mean error of filtered engines:", mean_error)
+        st.dataframe(final)
+
+        # plot distribution
+        fig, ax = plt.subplots()
+        fig.set_size_inches(3, 3)
+        plot = sns.histplot(x=final['abs error (%)'], kde=True, ax=ax)
+        plt.title('Error distrbution')
+        st.pyplot(plot.figure)
+
+        
