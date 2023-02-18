@@ -35,9 +35,6 @@ def main():
         single_predict()
 
 
-
-
-
 if __name__ == '__main__':
     main()
 
