@@ -22,7 +22,7 @@ def main():
     st.markdown("""---""")
     
     # set pages
-    page = st.sidebar.selectbox("Choose prediction method", ("Explore Data", "Bulk Predictions", "RUL simulator", "ML Ops"))
+    page = st.sidebar.selectbox("Choose prediction method", ("Explore Data", "Bulk Predictions", "RUL simulator"))
 
     # User selects bulk upload option
     if page == "Explore Data":
