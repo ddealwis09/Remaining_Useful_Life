@@ -1,8 +1,13 @@
+import os, sys
+from os.path import dirname, join, abspath
+sys.path.insert(0, abspath(join(dirname(__file__), '..')))
+from src.data.training import training
 from airflow import DAG
 #from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
 from airflow.operators.bash_operator import BashOperator
-from airflow.contrib.sensors.file_sensor import FileSensor
+from airflow.operators.python_operator import PythonOperator
+from pathlib import Path
 
 # docker-airflow-master % docker-compose -f docker-compose-LocalExecutor.yml up -d
 
@@ -24,33 +29,36 @@ with DAG(
     start_date=datetime(2023, 1, 8)
 ) as dag:
 
-    # check training data exists
-    t1 = BashOperator(
-        task_id='check_train_exists',
-        depends_on_past = False, 
-        bash_command='shasum /Users/dinushdealwis/Documents/ML_Projects/RUL/data/raw/train_FD001.txt',
-        retries = 2,
-        retry_delay = timedelta(seconds=15)
+    def check_file():
+        path = Path(__file__).parent.parent.parent.parent.resolve() 
+        filename = 'data/raw/train_FD001.txt'
+        fullpath = path.joinpath(filename)
+        file_path = fullpath
+        if os.path.isfile(file_path):
+            print(f"File {file_path} exists!")
+        else:
+            print(f"File {file_path} does not exist.")
+
+    t1 = PythonOperator(
+        task_id='check_file_task',
+        python_callable=check_file,
+        dag=dag)
+    
+
+    def training():
+        training
+
+
+    t2 = PythonOperator(
+        task_id = 'run_training',
+        python_callable = training,
+        dag=dag
     )
 
-    # check test feature data exists
-    t2 = BashOperator(
-        task_id='check_test_features',
-        depends_on_past = False, 
-        bash_command='shasum /Users/dinushdealwis/Documents/ML_Projects/RUL/data/raw/test_FD001.txt',
-        retries = 2,
-        retry_delay = timedelta(seconds=15)
-    )
 
-    # check test feature data exists
-    t3 = BashOperator(
-        task_id='check_test_labels',
-        depends_on_past = False, 
-        bash_command='shasum /Users/dinushdealwis/Documents/ML_Projects/RUL/data/raw/RUL_FD001.txt',
-        retries = 2,
-        retry_delay = timedelta(seconds=15)
-    )
+    t1 >> t2
 
-    [t1,t2,t3]
+
+
 
 
