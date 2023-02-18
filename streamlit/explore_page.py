@@ -131,23 +131,24 @@ def explore():
 
     # explore 3
     st.subheader("3. Test Set Predictions vs Actual")
-    st.text_area("Description", "Observe the model's performance vs actual RUL on the hold-out data set", key=3)
+    st.text_area("Description", "Observe the model's performance vs actual RUL on the hold-out data set. We are most concerned about over predictions (negative errors).", key=3)
 
     test_features = test.iloc[:,np.r_[0,5:26]]
     test_features['predicted'] = make_prediction(test_features)
     test_features['actual'] = rul
-    test_features['abs error (%)'] = abs(test_features.actual/test_features.predicted - 1) * 100
+    test_features['error'] = test_features.actual-test_features.predicted
     final = test_features.iloc[:,np.r_[0,22:25]]
 
     # determine threshold
-    max = int(final['abs error (%)'].max())
+    max = int(final['error'].max())
+    min = int(final['error'].min())
 
-    threshold = st.slider('Set threshold absolute error (%) to filter on:', 0, max, 1)
-    filter = st.radio( "Do you want to filter predictions for engines only above or at your error threshold?", ('Yes', 'No'))
+    threshold = st.slider('Set threshold error (in days) to filter on:', min, max, 0)
+    filter = st.radio( "Do you want to filter predictions for engines only below or at your error threshold?", ('Yes', 'No'))
 
     if filter == "Yes":
-        filtered = final[final['abs error (%)'] >= threshold]
-        st.write("Total number of engines above threshold:", len(filtered))
+        filtered = final[final['error'] <= threshold]
+        st.write("Total number of engines below threshold:", len(filtered))
         #mean_error = round(filtered['abs error (%)'].mean(),1)
         #st.write("Mean error of filtered engines:", mean_error)
         st.dataframe(filtered)
@@ -155,7 +156,7 @@ def explore():
         # plot distribution
         fig, ax = plt.subplots()
         fig.set_size_inches(3, 3)
-        plot = sns.histplot(x=filtered['abs error (%)'], kde=True, ax=ax)
+        plot = sns.histplot(x=filtered['error'], kde=True, ax=ax)
         plt.title('Error distrbution')
         st.pyplot(plot.figure)
     else:
@@ -167,7 +168,7 @@ def explore():
         # plot distribution
         fig, ax = plt.subplots()
         fig.set_size_inches(3, 3)
-        plot = sns.histplot(x=final['abs error (%)'], kde=True, ax=ax)
+        plot = sns.histplot(x=final['error'], kde=True, ax=ax)
         plt.title('Error distrbution')
         st.pyplot(plot.figure)
 
