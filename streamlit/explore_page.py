@@ -86,7 +86,6 @@ def explore():
     st.subheader("1. Single Engine Facet")
     st.text_area("Description", "Select a single aircraft and observe it's engine degregation (RUL) across all sensors", key=1)
     aircraft_units = list(train['unit_number'].unique())
-    
     # user inputs
     engine_select = st.selectbox("Select aircraft ID", aircraft_units)
 
@@ -105,12 +104,13 @@ def explore():
     melted = pd.melt(subset, id_vars = subset.iloc[:,0:3], value_vars=subset.iloc[:,3:], 
                     var_name="sensor", value_name="reading")
 
+    @st.cache
     def sensorFacetPlot(df, unit_number):
         t = df[df['unit_number']==unit_number]
         g = sns.FacetGrid(t, col="sensor", col_wrap=4, sharex=False, sharey=False)
         g.map_dataframe(sns.regplot, x="RUL", y="reading", order=2, 
                         scatter=True, color='red', scatter_kws={"s": 80, "color": "lightblue", "edgecolor":"black"})
-
+ 
     st.pyplot(sensorFacetPlot(melted, engine_select)), melted
 
     # explore 2
@@ -121,6 +121,7 @@ def explore():
     # user inputs
     sensor_select = st.selectbox("Select a sensor", aircraft_sensors)
 
+    @st.cache
     def engineFacetPlot(df, sensor):
         t = df[df['sensor']==sensor]
         g = sns.FacetGrid(t, col="unit_number", col_wrap=4, sharex=False, sharey=False)
