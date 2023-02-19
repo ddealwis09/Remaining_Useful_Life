@@ -50,10 +50,22 @@ In terms of data sources, we will be using the NASA turbofan engine degradation 
         ├── modeling    <- scripts for generating models
     |--- environment.yml <- file with libraries and library versions for recreating the analysis environment
    
-#### How to use
+#### Streamlit Share
 ---------------------
 
-To reproduce the results end-to-end...
+The application allows users to perform three tasks:
+1. Explore: users can explore the relationship between sensor readings and RUL for a selected engine, explore the relationship for a single sensor and RUL across all engines and lastly see how the SVR model performed vs the test set
+2. Bulk upload sensor readings via a .csv file to get predictions for all uploaded engines
+3. Simulate the impact on RUL for changes in sensor readings for a single device 
 
-To simply run the front end Streamlit application...
+#### Deplomyment
+---------------------
+Local: 
+    - clone this repo
+    - 
 
+Cloud:
+    - 
+
+#### Systems Diagram
+---------------------
