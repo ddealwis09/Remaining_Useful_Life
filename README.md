@@ -65,13 +65,12 @@ The application allows users to perform three tasks:
 #### Deployment
 ---------------------
 Local: 
-    - clone this repo
-    - 
-
-Cloud:
-    - clone this repo
+- the DockerFile installs git and clones this repo
+- build the docker image using Docker Compose
+- open your browser and go to local host port 8501 (EXPOSED in the Dockerfile)
 
 #### Systems Diagram
 ---------------------
+
 
 
