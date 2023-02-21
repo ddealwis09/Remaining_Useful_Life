@@ -69,8 +69,7 @@ Local:
 - build the docker image using Docker Compose
 - open your browser and go to local host port 8501 (EXPOSED in the Dockerfile)
 
-#### Systems Diagram
----------------------
+
 
 
 
